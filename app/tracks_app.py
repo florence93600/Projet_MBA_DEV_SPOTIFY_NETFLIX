@@ -126,3 +126,21 @@ elif explicit_opt == "Non":
 
 
 df_filtered = con.execute(f"SELECT * FROM tracks_clean WHERE {' AND '.join(conditions)}").df()
+
+# =========================================================
+# 5. DASHBOARD - SECTION 1 : INDICATEURS CLÉS (KPI)
+# =========================================================
+
+
+st.markdown("---")
+# Calcul des métriques
+total_tracks = len(df_filtered)
+avg_pop = df_filtered['popularity'].mean() if not df_filtered.empty else 0
+explicit_rate = (df_filtered['explicit'].mean() * 100) if not df_filtered.empty else 0
+
+
+# Affichage des métriques côte à côte
+m1, m2, m3 = st.columns(3)
+m1.metric("💿 Répertoire", f"{total_tracks:,}")
+m2.metric("🔥 Popularité Moyenne", f"{avg_pop:.1f} / 100")
+m3.metric("📢 Taux d'Explicité", f"{explicit_rate:.1f}%")
