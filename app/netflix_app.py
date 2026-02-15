@@ -162,5 +162,5 @@ with col_trend:
         df_plot['Total'] = df_plot.sum(axis=1)
         st.line_chart(df_plot)
 
-        
-
+# Fermeture de la connexion
+con.close()
