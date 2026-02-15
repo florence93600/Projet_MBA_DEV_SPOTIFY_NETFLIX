@@ -129,3 +129,12 @@ if not df_art.empty:
     with k4:
         mod_rate = (len(df_art[df_art['segment_modernite']=='Modern/Fusion'])/len(df_art)*100)
         st.metric("🚀 Indice Modernité", f"{mod_rate:.1f}%")
+
+         # --- GRAPHIQUE 1 : BARS ---
+    st.markdown("---")
+    st.subheader("🔥 Top Genres Bruts (Spotify Data)")
+    df_raw_genres = df_art.groupby('main_genre_raw')['followers'].sum().sort_values(ascending=False).head(15).reset_index()
+    fig_raw = px.bar(df_raw_genres, x='followers', y='main_genre_raw', orientation='h',
+                     color='followers', color_continuous_scale='Greens', text_auto='.2s')
+    fig_raw.update_layout(yaxis={'autorange': 'reversed'}, plot_bgcolor='rgba(0,0,0,0)', yaxis_title=None, height=500)
+    st.plotly_chart(fig_raw, use_container_width=True)
