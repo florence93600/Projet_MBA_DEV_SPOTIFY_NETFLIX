@@ -185,3 +185,52 @@ with col_right:
                 st.caption(f"Année : {row['release_year']}")
     else:
         st.info("Aucun titre ne correspond aux filtres.")
+
+# =========================================================
+# 7. ANALYSE DU DYNAMISME (VOLUME & TENDANCE)
+# =========================================================
+st.markdown("---")
+st.subheader("📊 Dynamisme de Production")
+
+
+if not df_filtered.empty:
+    # 1. Préparation des données (on groupe par année)
+    df_trend = df_filtered.groupby('release_year').size().reset_index(name='nb')
+   
+    # 2. Création du graphique (On s'assure qu'il n'y a qu'UN SEUL appel à px.bar)
+    fig = px.bar(df_trend,
+                 x='release_year',
+                 y='nb',
+                 color_discrete_sequence=['#1DB954'],
+                 opacity=0.4)
+
+
+    # 3. Ajout de la ligne de tendance
+    fig.add_scatter(x=df_trend['release_year'],
+                    y=df_trend['nb'],
+                    line=dict(color='#00D1FF', width=3, shape='spline'),
+                    name="Tendance")
+
+
+    # 4. Mise en forme
+    fig.update_layout(
+        xaxis_title=None,
+        yaxis_title=None,
+        showlegend=False,
+        plot_bgcolor='rgba(0,0,0,0)',
+        hovermode="x unified"
+    )
+
+
+    # 5. L'UNIQUE affichage du graphique
+    st.plotly_chart(fig, use_container_width=True, key="graphique_unique_dynamisme")
+
+
+else:
+    st.info("Données insuffisantes pour cette période.")
+
+
+# =========================================================
+# FIN DU SCRIPT (Vérifie qu'il n'y a rien après con.close())
+# =========================================================
+con.close()        
