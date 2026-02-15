@@ -112,3 +112,17 @@ year_range = st.sidebar.slider(
 
 # --- B) Type de contenu ---
 explicit_opt = st.sidebar.radio("Contenu Explicite", options=["Tous", "Oui", "Non"])
+
+# =========================================================
+# 4. FILTRAGE DES DONNÉES
+# =========================================================
+
+
+conditions = [f"release_year BETWEEN {year_range[0]} AND {year_range[1]}"]
+if explicit_opt == "Oui":
+    conditions.append("explicit = 1")
+elif explicit_opt == "Non":
+    conditions.append("explicit = 0")
+
+
+df_filtered = con.execute(f"SELECT * FROM tracks_clean WHERE {' AND '.join(conditions)}").df()
