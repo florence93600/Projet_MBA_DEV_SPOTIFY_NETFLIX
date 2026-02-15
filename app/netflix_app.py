@@ -129,4 +129,38 @@ with col_retention:
     else:
         st.write("Aucune série trouvée")
 
+# =========================================================
+# 6. ANALYSE DES TALENTS ET DYNAMISME (DEUX COLONNES)
+# =========================================================
+
+st.markdown("---")
+col_star, col_trend = st.columns(2)
+
+with col_star:
+    st.subheader("🌟 Star Power (Top 5)")
+    # Récupération de la colonne "cast" (protégée par des guillemets car mot réservé)
+    df_cast = con.execute(f'SELECT "cast" FROM {TABLE_NAME} {where_sql}').df()
+    
+    if not df_cast.empty:
+        # Explosion de la liste des acteurs et comptage
+        top_5 = df_cast['cast'].str.split(', ').explode().str.strip().value_counts()
+        top_5 = top_5[~top_5.index.isin(['nan', '', 'Inconnu'])].head(5).reset_index()
+        top_5.columns = ['Acteur', 'Films']
+
+        fig_star = px.bar(top_5, x='Films', y='Acteur', orientation='h', color='Films', color_continuous_scale='Reds')
+        fig_star.update_layout(margin=dict(t=0,b=0,l=0,r=0), height=250, coloraxis_showscale=False, yaxis={'autorange': 'reversed'})
+        st.plotly_chart(fig_star, use_container_width=True)
+
+with col_trend:
+    st.subheader("📈 Dynamisme des Sorties")
+    # Évolution temporelle par type
+    df_trend = con.execute(f"SELECT release_year, type FROM {TABLE_NAME} {where_sql}").df()
+    
+    if not df_trend.empty:
+        # Pivot pour avoir une colonne par type et une ligne Total
+        df_plot = df_trend.groupby(['release_year', 'type']).size().unstack(fill_value=0)
+        df_plot['Total'] = df_plot.sum(axis=1)
+        st.line_chart(df_plot)
+
         
+
