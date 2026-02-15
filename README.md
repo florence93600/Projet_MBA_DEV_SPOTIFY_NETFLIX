@@ -6,36 +6,6 @@
 Ce projet de Business Intelligence, réalisé pour le MBA ESG, propose une plateforme analytique interactive permettant de décrypter les stratégies de contenus de Netflix et Spotify.
 L'application utilise une architecture performante basée sur DuckDB pour traiter plus d'un million de lignes, offrant des insights stratégiques sur la production cinématographique et les dynamiques du marché musical.
 
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Équipe Projet</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            max-width: 900px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: left;
-            vertical-align: top;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-    </style>
-</head>
-<body>
 
 <h2>Tableau des Membres de l'Équipe</h2>
 
