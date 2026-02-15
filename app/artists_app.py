@@ -99,3 +99,33 @@ if sel_segment:
 
 
 df_art = con.execute(query, params).df()
+
+# =========================================================
+# 4. ANALYSE ET AFFICHAGE (UN SEUL BLOC VERTICAL)
+# =========================================================
+if not df_art.empty:
+    # --- KPIs ---
+    # st.markdown("---")
+    # k1, k2, k3, k4 = st.columns(4)
+    # k1.metric("👤 Pool Artistes", f"{len(df_art):,}")
+    # k2.metric("📢 Portée Totale", f"{df_art['followers'].sum()/1e6:.1f}M folls")
+    # k3.metric("🔥 Popularité Moyenne", f"{df_art['popularity'].mean():.1f}/100")
+    # k4.metric("🚀 Indice Modernité", f"{(len(df_art[df_art['segment_modernite']=='Modern/Fusion'])/len(df_art)*100):.1f}%")
+
+
+    st.markdown("---")
+   
+    # --- SECTION KPIs (AVEC FIX POUR LES CHIFFRES COUPÉS) ---
+    # On utilise des st.columns mais on force l'affichage via du CSS si besoin
+    k1, k2, k3, k4 = st.columns(4)
+   
+    with k1:
+        st.metric("👤 Pool Artistes", f"{len(df_art):,}")
+    with k2:
+        portee_m = df_art['followers'].sum() / 1_000_000
+        st.metric("📢 Portée Totale", f"{portee_m:,.1f}M")
+    with k3:
+        st.metric("🔥 Popularité Moyenne", f"{df_art['popularity'].mean():.1f}/100")
+    with k4:
+        mod_rate = (len(df_art[df_art['segment_modernite']=='Modern/Fusion'])/len(df_art)*100)
+        st.metric("🚀 Indice Modernité", f"{mod_rate:.1f}%")
