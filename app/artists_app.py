@@ -181,3 +181,18 @@ if not df_art.empty:
     st.info("""
         **Indicateur de Momentum :** Il permet d'isoler les genres bénéficiant d'un engagement actif immédiat (flux), par opposition à une base de fans passive (stock).
     """)
+
+    # --- TABLEAU FINAL ---
+    st.markdown("---")
+    st.subheader("🏆 Leaders du Marché (Top 10 par Followers)")
+    st.dataframe(
+        df_art.sort_values('followers', ascending=False).head(10)[['artist_name', 'main_genre_raw', 'genre_famille', 'followers']],
+        use_container_width=True, hide_index=True
+    )
+
+
+else:
+    st.warning("⚠️ Aucun résultat. Essayez d'élargir les filtres.")
+
+
+con.close()
