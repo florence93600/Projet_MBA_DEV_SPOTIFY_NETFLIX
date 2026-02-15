@@ -37,3 +37,45 @@ TABLE_TRACKS = "table_tracks"
 
 # Connexion à DuckDB
 con = duckdb.connect(database=str(DB_PATH), read_only=True)
+
+# =========================================================
+# 2. PIPELINE DE TRAITEMENT (NETTOYAGE & DÉDOUBLONNAGE)
+# =========================================================
+
+
+con.execute(f"""
+    CREATE OR REPLACE TEMP TABLE tracks_clean AS
+   
+    WITH normalized_tracks AS (
+        SELECT *,
+            -- Normalisation du nom (retrait parenthèses/crochets)
+            TRIM(regexp_replace(CAST(name AS VARCHAR), '\\s*[\\(\\[][^\\)\\]]*[\\)\\]]', '', 'g')) as pure_name,
+            -- Nettoyage de la liste des artistes
+            regexp_replace(artists, '[\[\]\'']', '', 'g') as clean_artists,
+            -- Extraction de l'année
+            SUBSTR(TRIM(CAST(release_date AS VARCHAR)), 1, 4) as clean_year
+        FROM {TABLE_TRACKS}
+    ),
+
+
+    dedup_logic AS (
+        SELECT *,
+            -- Définition de l'unicité par Nom Pur, Durée et Année
+            ROW_NUMBER() OVER(
+                PARTITION BY LOWER(pure_name), ROUND(duration_ms / 60000.0, 1), clean_year
+                ORDER BY popularity DESC
+            ) as rn
+        FROM normalized_tracks
+    )
+
+
+    SELECT
+        id,
+        pure_name || ' (' || clean_artists || ')' as full_title,
+        popularity,
+        explicit,
+        (duration_ms / 60000.0) as duration_min,
+        CAST(clean_year AS INTEGER) as release_year
+    FROM dedup_logic
+    WHERE rn = 1
+""")
