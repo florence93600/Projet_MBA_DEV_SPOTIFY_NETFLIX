@@ -1,0 +1,39 @@
+from pathlib import Path
+import duckdb
+import pandas as pd
+import streamlit as st
+import plotly.express as px
+
+
+# =========================================================
+# 1. CONFIGURATION ET CONNEXION
+# =========================================================
+
+
+st.set_page_config(page_title="Music Tracks Dashboard", layout="wide")
+
+
+st.title("🎵 Business Intelligence Music")
+st.markdown("Analyse stratégique du catalogue de titres (Tracks)")
+st.markdown("""
+    <style>
+    /* Taille du chiffre principal */
+    [data-testid="stMetricValue"] {
+        font-size: 25px !important;
+    }
+    /* Taille du label (le titre au-dessus) */
+    [data-testid="stMetricLabel"] {
+        font-size: 14px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+# Gestion des chemins
+BASE_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = BASE_DIR / "data" / "ma_base_globale.db"
+TABLE_TRACKS = "table_tracks"
+
+
+# Connexion à DuckDB
+con = duckdb.connect(database=str(DB_PATH), read_only=True)
