@@ -138,3 +138,14 @@ if not df_art.empty:
                      color='followers', color_continuous_scale='Greens', text_auto='.2s')
     fig_raw.update_layout(yaxis={'autorange': 'reversed'}, plot_bgcolor='rgba(0,0,0,0)', yaxis_title=None, height=500)
     st.plotly_chart(fig_raw, use_container_width=True)
+
+# --- GRAPHIQUE 2 : SCATTER ---
+    # --- GRAPHIQUE 2 : INDICE DE DYNAMISME (Lollipop Chart) ---
+    st.markdown("---")
+    st.subheader("🚀 Indice de Dynamisme : Quels genres dominent l'actualité ?")
+   
+    # 1. Préparation des données : Moyenne de popularité par Genre
+    df_dyn = df_art.groupby('main_genre_raw').agg({
+        'popularity': 'mean',
+        'followers': 'sum'
+    }).reset_index()
