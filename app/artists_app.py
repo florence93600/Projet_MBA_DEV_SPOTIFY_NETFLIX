@@ -33,3 +33,36 @@ TABLE_ARTISTS = "table_artists"
 
 
 con = duckdb.connect(database=str(DB_PATH), read_only=True)
+
+# =========================================================
+# 2. PIPELINE : NETTOYAGE & CLASSIFICATION
+# =========================================================
+con.execute(f"""
+    CREATE OR REPLACE TEMP TABLE artists_clean AS
+    WITH raw_prep AS (
+        SELECT
+            id, name as artist_name, followers, popularity,
+            LOWER(genres) as g,
+            TRIM(string_split(regexp_replace(genres, '[\[\]\'']', '', 'g'), ',')[1]) as main_genre_raw
+        FROM {TABLE_ARTISTS}
+        WHERE genres IS NOT NULL AND genres != '[]'
+    )
+    SELECT
+        *,
+        CASE
+            WHEN g LIKE '%pop%' OR g LIKE '%opm%' THEN 'WORLD POP'
+            WHEN g LIKE '%folk%' OR g LIKE '%flamenco%' OR g LIKE '%traditional%' THEN 'FOLK / TRADITIONAL'
+            WHEN g LIKE '%hip hop%' OR g LIKE '%rap%' OR g LIKE '%trap%' THEN 'REGIONAL HIP-HOP'
+            WHEN g LIKE '%amapiano%' OR g LIKE '%house%' OR g LIKE '%dance%' THEN 'ELECTRONIC / DANCE'
+            WHEN g LIKE '%bollywood%' OR g LIKE '%filmi%' THEN 'FILM MUSIC'
+            WHEN g LIKE '%sufi%' OR g LIKE '%qawwali%' OR g LIKE '%nasheed%' THEN 'DEVOTIONAL / SPIRITUAL'
+            WHEN g LIKE '%fusion%' OR g LIKE '%hybrid%' THEN 'FUSION / GLOBAL HYBRID'
+            WHEN g LIKE '%ambient%' OR g LIKE '%meditation%' THEN 'AMBIENT / WELLNESS'
+            ELSE 'OTHER'
+        END as genre_famille,
+        CASE
+            WHEN g LIKE '%pop%' OR g LIKE '%hip hop%' OR g LIKE '%trap%' OR g LIKE '%electronic%' THEN 'Modern/Fusion'
+            ELSE 'Traditional/Heritage'
+        END as segment_modernite
+    FROM raw_prep
+""")
