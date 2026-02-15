@@ -79,3 +79,36 @@ con.execute(f"""
     FROM dedup_logic
     WHERE rn = 1
 """)
+
+# =========================================================
+# 3. FILTRES (SIDEBAR)
+# =========================================================
+
+
+st.sidebar.header("🎯 Filtres Stratégiques")
+
+
+# --- A) Période d'analyse ---
+max_db = int(con.execute("SELECT MAX(release_year) FROM tracks_clean").fetchone()[0])
+
+
+scope = st.sidebar.radio(
+    "Amplitude de l'analyse :",
+    options=["10 dernières années", "25 dernières années"],
+    index=0
+)
+
+
+min_analysis = max_db - 10 if scope == "10 dernières années" else max_db - 25
+
+
+year_range = st.sidebar.slider(
+    "Ajuster la fenêtre d'observation",
+    min_value=min_analysis,
+    max_value=max_db,
+    value=(min_analysis, max_db)
+)
+
+
+# --- B) Type de contenu ---
+explicit_opt = st.sidebar.radio("Contenu Explicite", options=["Tous", "Oui", "Non"])
