@@ -60,3 +60,20 @@ selected_country = st.sidebar.selectbox("Zone Géographique", options=["Tous les
 
 # --- C) Sélection de la Période ---
 year_range = st.sidebar.slider("Période de sortie", 1940, 2024, (1940, 2024))
+
+# =========================================================
+# 3. CONSTRUCTION DE LA REQUÊTE SQL DYNAMIQUE
+# =========================================================
+
+# Cette section traduit les choix de l'utilisateur en langage SQL
+conditions = [f"release_year BETWEEN {year_range[0]} AND {year_range[1]}"]
+
+if selected_types:
+    formatted_types = ",".join([f"'{t}'" for t in selected_types])
+    conditions.append(f"type IN ({formatted_types})")
+
+if selected_country != "Tous les pays":
+    # On utilise LIKE pour trouver le pays même s'il est dans une liste (ex: "France, Spain")
+    conditions.append(f"country LIKE '%{selected_country}%'")
+
+where_sql = "WHERE " + " AND ".join(conditions)
