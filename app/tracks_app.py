@@ -144,3 +144,44 @@ m1, m2, m3 = st.columns(3)
 m1.metric("💿 Répertoire", f"{total_tracks:,}")
 m2.metric("🔥 Popularité Moyenne", f"{avg_pop:.1f} / 100")
 m3.metric("📢 Taux d'Explicité", f"{explicit_rate:.1f}%")
+
+# =========================================================
+# 6. DASHBOARD - SECTION 2 : PERFORMANCE & FORMAT
+# =========================================================
+
+
+st.markdown("---")
+col_left, col_right = st.columns([1, 2])
+
+
+with col_left:
+    st.subheader("⏳ Format temporel")
+    avg_dur = df_filtered['duration_min'].mean() if not df_filtered.empty else 0
+   
+    # Affichage "Netflix Style" pour la durée
+    st.markdown(f"""
+        <div style="background-color: #1e1e1e; padding: 20px; border-radius: 10px; border-left: 5px solid #1DB954; text-align: center;">
+            <h1 style="color: #1DB954; margin: 0;">{avg_dur:.2f} min</h1>
+            <p style="color: #ffffff; font-size: 0.9em;">Durée moyenne par titre</p>
+        </div>
+    """, unsafe_allow_html=True)
+   
+    st.caption("Une durée stable entre 3 et 4 min indique un catalogue calibré pour la radio et le streaming.")
+
+
+with col_right:
+    st.subheader("🔥 Top 5 des morceaux les plus populaires")
+    df_top5 = df_filtered.sort_values('popularity', ascending=False).head(5)
+
+
+    if not df_top5.empty:
+        for _, row in df_top5.iterrows():
+            c_title, c_score = st.columns([3, 1])
+            with c_title:
+                st.write(f"**{row['full_title']}**")
+                st.progress(int(row['popularity']))
+            with c_score:
+                st.write(f"Score : **{row['popularity']}**")
+                st.caption(f"Année : {row['release_year']}")
+    else:
+        st.info("Aucun titre ne correspond aux filtres.")
