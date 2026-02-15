@@ -77,3 +77,20 @@ if selected_country != "Tous les pays":
     conditions.append(f"country LIKE '%{selected_country}%'")
 
 where_sql = "WHERE " + " AND ".join(conditions)
+
+# =========================================================
+# 4. SECTION DES INDICATEURS CLÉS (KPI)
+# =========================================================
+
+st.markdown("---")
+# Récupération des volumes totaux
+kpi_data = con.execute(f"SELECT type, COUNT(*) as total FROM {TABLE_NAME} {where_sql} GROUP BY type").df()
+total_titles = kpi_data['total'].sum()
+
+# Affichage des métriques sur une ligne
+m1, m2, m3 = st.columns(3)
+m1.metric("Total Catalogue", f"{total_titles:,}")
+m2.metric("Movie", kpi_data[kpi_data['type']=='Movie']['total'].sum())
+m3.metric("TV Show", kpi_data[kpi_data['type']=='TV Show']['total'].sum())
+
+
