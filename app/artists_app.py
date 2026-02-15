@@ -149,3 +149,35 @@ if not df_art.empty:
         'popularity': 'mean',
         'followers': 'sum'
     }).reset_index()
+
+ # 2. On filtre les 15 genres qui ont la plus haute popularité (les plus "chauds")
+    # Condition : on ne prend que ceux qui ont un minimum de poids (ex: > 100k followers)
+    df_dyn = df_dyn[df_dyn['followers'] > 100000].sort_values('popularity', ascending=False).head(15)
+
+     # 3. Création du Lollipop Chart
+    fig_dyn = px.scatter(df_dyn, x='popularity', y='main_genre_raw',
+                         size='popularity', color='popularity',
+                         color_continuous_scale='Viridis',
+                         labels={'popularity': 'Score de Popularité (0-100)', 'main_genre_raw': 'Genre'})
+
+# Ajout des lignes pour l'effet "Lollipop"
+    for i in range(len(df_dyn)):
+        fig_dyn.add_shape(
+            type='line', x0=0, y0=i, x1=df_dyn.iloc[i]['popularity'], y1=i,
+            line=dict(color='gray', width=1, dash='dot')
+        )
+
+
+    fig_dyn.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',
+        yaxis={'autorange': 'reversed'},
+        xaxis_range=[0, 105],
+        height=600,
+        showlegend=False
+    )
+   
+    st.plotly_chart(fig_dyn, use_container_width=True)
+   
+    st.info("""
+        **Indicateur de Momentum :** Il permet d'isoler les genres bénéficiant d'un engagement actif immédiat (flux), par opposition à une base de fans passive (stock).
+    """)
