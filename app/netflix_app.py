@@ -93,4 +93,40 @@ m1.metric("Total Catalogue", f"{total_titles:,}")
 m2.metric("Movie", kpi_data[kpi_data['type']=='Movie']['total'].sum())
 m3.metric("TV Show", kpi_data[kpi_data['type']=='TV Show']['total'].sum())
 
+# =========================================================
+# 5. ANALYSE FORMAT ET RÉTENTION (DEUX COLONNES)
+# =========================================================
 
+st.markdown("---")
+col_format, col_retention = st.columns(2)
+
+with col_format:
+    st.subheader("⏳ Format Culturel")
+    # Calcul de la durée moyenne uniquement pour les films
+    q_dur = f"SELECT AVG(CAST(regexp_extract(duration, '(\\d+)', 1) AS INTEGER)) as moy FROM {TABLE_NAME} {where_sql} AND type = 'Movie'"
+    avg_dur = con.execute(q_dur).df()['moy'].iloc[0]
+    
+    if avg_dur:
+        st.markdown(f"<h1 style='text-align: center; color: #E50914;'>{avg_dur:.0f} min</h1>", unsafe_allow_html=True)
+        st.caption("<p style='text-align: center;'>Durée moyenne d'un long-métrage</p>", unsafe_allow_html=True)
+    else:
+        st.write("Données insuffisantes")
+
+with col_retention:
+    st.subheader("🔄 Taux de Rétention (Séries)")
+    # Analyse du succès des séries (plus d'une saison)
+    q_ret = f"SELECT duration FROM {TABLE_NAME} {where_sql} AND type = 'TV Show'"
+    df_ret = con.execute(q_ret).df()
+
+    if not df_ret.empty:
+        # Transformation : on extrait le chiffre et on catégorise
+        counts = df_ret['duration'].str.extract('(\d+)').astype(int)[0].gt(1).value_counts()
+        counts.index = ['Succès (2+ Saisons)', 'Saison Unique']
+        
+        fig_pie = px.pie(values=counts.values, names=counts.index, hole=.6, color_discrete_sequence=['#E50914', '#564d4d'])
+        fig_pie.update_layout(margin=dict(t=0, b=0, l=0, r=0), height=200, legend=dict(orientation="h", y=-0.2))
+        st.plotly_chart(fig_pie, use_container_width=True)
+    else:
+        st.write("Aucune série trouvée")
+
+        
