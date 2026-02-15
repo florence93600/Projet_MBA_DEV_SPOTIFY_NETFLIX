@@ -66,3 +66,36 @@ con.execute(f"""
         END as segment_modernite
     FROM raw_prep
 """)
+
+# =========================================================
+# 3. FILTRES DYNAMIQUES (SIDEBAR)
+# =========================================================
+st.sidebar.header("🎯 Filtres de Sélection")
+
+
+familles = con.execute("SELECT DISTINCT genre_famille FROM artists_clean ORDER BY genre_famille").df()['genre_famille'].tolist()
+sel_familles = st.sidebar.multiselect("Sélectionner des Familles", options=familles, default=familles[0:3])
+
+
+max_foll = int(con.execute("SELECT MAX(followers) FROM artists_clean").fetchone()[0])
+foll_range = st.sidebar.slider("Tranche de Followers", 0, max_foll, (0, max_foll))
+
+
+sel_segment = st.sidebar.multiselect("Segment Culturel", options=['Modern/Fusion', 'Traditional/Heritage'], default=['Modern/Fusion', 'Traditional/Heritage'])
+
+
+query = "SELECT * FROM artists_clean WHERE followers BETWEEN ? AND ?"
+params = [foll_range[0], foll_range[1]]
+
+
+if sel_familles:
+    query += f" AND genre_famille IN ({','.join(['?' for _ in sel_familles])})"
+    params.extend(sel_familles)
+
+
+if sel_segment:
+    query += f" AND segment_modernite IN ({','.join(['?' for _ in sel_segment])})"
+    params.extend(sel_segment)
+
+
+df_art = con.execute(query, params).df()
