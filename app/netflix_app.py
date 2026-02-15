@@ -35,3 +35,28 @@ TABLE_NAME = "table_netflix"
 
 # Connexion à DuckDB en mode lecture seule (plus rapide et sécurisé)
 con = duckdb.connect(database=str(DB_PATH), read_only=True)
+
+# =========================================================
+# 2. PRÉPARATION DES FILTRES (SIDEBAR)
+# =========================================================
+
+st.sidebar.header("🎯 Filtres Stratégiques")
+
+# --- A) Extraction des types (Movie/TV Show) ---
+types_list = con.execute(f"SELECT DISTINCT type FROM {TABLE_NAME} WHERE type IS NOT NULL").df()["type"].tolist()
+selected_types = st.sidebar.multiselect("Catégorie de produit", options=types_list, default=types_list)
+
+# --- B) Nettoyage et Extraction des Pays ---
+# On récupère les données brutes pour nettoyer les virgules traînantes
+raw_countries = con.execute(f"SELECT DISTINCT country FROM {TABLE_NAME} WHERE country IS NOT NULL").df()
+unique_countries = set()
+for row in raw_countries['country']:
+    for p in row.split(','):
+        clean_p = p.strip(" ,") # Supprime espaces et virgules aux extrémités
+        if clean_p: unique_countries.add(clean_p)
+
+sorted_countries = sorted(list(unique_countries))
+selected_country = st.sidebar.selectbox("Zone Géographique", options=["Tous les pays"] + sorted_countries)
+
+# --- C) Sélection de la Période ---
+year_range = st.sidebar.slider("Période de sortie", 1940, 2024, (1940, 2024))
